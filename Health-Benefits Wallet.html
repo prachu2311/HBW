@@ -1,0 +1,584 @@
+git <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health-Benefits Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a phone-width app shell centred on the page, teal palette from the Healthcare reference. */
+:root{
+  --teal:#0F766E; --mint:#99F6E4; --mist:#F0FDFA; --deep:#134E4A;
+  --ink:#0E2A28; --muted:#5B7370; --line:#D3E8E4; --card:#FFFFFF;
+  --warn:#B45309; --warn-bg:#FEF3C7; --bad:#B42318; --bad-bg:#FEE4E2; --ok-bg:#CCFBF1;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--mist);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.stage{height:100%;display:flex;justify-content:center;align-items:stretch}
+.shell{width:100%;max-width:440px;height:100%;background:var(--mist);display:flex;flex-direction:column;position:relative;overflow:hidden}
+@media (min-width:600px){
+  .stage{padding:16px 0;background:linear-gradient(180deg,#DDF7F2,#F0FDFA)}
+  .shell{height:100%;border-radius:28px;box-shadow:0 20px 60px rgba(19,78,74,.22);border:1px solid var(--line)}
+}
+.scroll{flex:1;overflow-y:auto;padding:16px 16px 24px;-webkit-overflow-scrolling:touch}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;color:var(--deep)}
+h1{font-size:28px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
+p{margin:0}
+.muted{color:var(--muted)} .small{font-size:13px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.tint{background:var(--ok-bg);border-color:var(--mint)}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-weight:600;cursor:pointer;background:var(--teal);color:#fff;width:100%;transition:background .15s}
+.btn:hover{background:var(--deep)}
+.btn.alt{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}
+.btn.alt:hover{background:var(--mist)}
+.btn.ghost{background:transparent;color:var(--teal);width:auto;padding:8px 10px}
+.btn.danger{background:var(--bad)}
+.btn.sm{padding:8px 12px;width:auto;font-size:13px;border-radius:10px}
+:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+label{display:block;font-weight:600;font-size:13px;margin-bottom:5px;color:var(--deep)}
+input,select,textarea{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:11px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(153,246,228,.55)}
+textarea{min-height:70px;resize:vertical}
+.field{margin-bottom:12px}
+.err{color:var(--bad);font-size:13px;margin-top:5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.pill.ok{background:var(--ok-bg);color:var(--deep)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.gray{background:#E8F0EE;color:var(--muted)}
+.topbar{display:flex;align-items:center;gap:10px;padding:14px 16px 6px}
+.topbar h2{flex:1}
+.back{border:0;background:#fff;border:1px solid var(--line);width:36px;height:36px;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--teal)}
+.ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nav button{border:0;background:none;padding:6px 2px;color:var(--muted);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border-radius:12px}
+.nav button.on{color:var(--teal);background:var(--mist)}
+.hero{background:var(--deep);color:#fff;padding:36px 22px 28px;border-radius:0 0 28px 28px}
+.hero h1{color:#fff;margin-top:14px}
+.hero p{color:#BFE9E3;margin-top:8px}
+.logo{width:44px;height:44px;border-radius:14px;background:var(--teal);display:grid;place-items:center;color:#fff}
+.demo{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600}
+.otp{letter-spacing:.6em;text-align:center;font-size:24px;font-weight:700}
+.steps{display:flex;gap:6px;margin:4px 0 16px}
+.steps i{flex:1;height:5px;border-radius:5px;background:var(--line)} .steps i.on{background:var(--teal)}
+.ring{--p:0;width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--mint) calc(var(--p)*1%),rgba(255,255,255,.18) 0);display:grid;place-items:center;flex:none}
+.ring b{width:64px;height:64px;border-radius:50%;background:var(--deep);display:grid;place-items:center;color:#fff;font-family:var(--font-display);font-size:20px}
+.score{background:var(--deep);color:#fff;border-radius:20px;padding:16px}
+.score h3{color:#fff} .score .muted{color:#BFE9E3}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:none;background:rgba(255,255,255,.18);color:#fff}
+.dot.done{background:var(--mint);color:var(--deep)}
+.light .dot{background:#E3EFEC;color:#fff} .light .dot.done{background:var(--teal);color:#fff}
+.tile{display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;cursor:pointer;font-weight:600}
+.tile .ic{color:var(--teal)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.drop{border:2px dashed var(--teal);background:#fff;border-radius:16px;padding:18px;text-align:center;cursor:pointer;color:var(--teal);font-weight:600}
+.drop.hot{background:var(--ok-bg)}
+.drop input{display:none}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)} .kv span:nth-child(even){font-weight:600;text-align:right}
+.bar{height:8px;background:#E3EFEC;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--teal)}
+.modal{position:absolute;inset:0;background:rgba(14,42,40,.5);display:flex;align-items:flex-end;z-index:20}
+.sheet{background:#fff;width:100%;border-radius:22px 22px 0 0;padding:18px 16px 22px;max-height:88%;overflow:auto}
+.toast{position:absolute;left:16px;right:16px;bottom:78px;background:var(--deep);color:#fff;padding:12px 14px;border-radius:12px;font-weight:600;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.hr{height:1px;background:var(--line);margin:4px 0}
+.tag{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em}
+.preview{width:100%;max-height:220px;object-fit:contain;border-radius:12px;background:var(--mist)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage"><div class="shell" id="shell"><div id="app" style="display:flex;flex-direction:column;height:100%"></div><div id="layer"></div></div></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const ICONS={
+ home:'<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+ pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ folder:'<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ upload:'<path d="M12 16V4m0 0l-4 4m4-4l4 4M4 20h16"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ alert:'<path d="M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+ file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ claim:'<path d="M9 3h6a1 1 0 0 1 1 1v2H8V4a1 1 0 0 1 1-1zM8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2M9 14l2 2 4-4"/>',
+ cross:'<path d="M12 5v14M5 12h14" stroke-width="3"/>'
+};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const BG=['A+','A-','B+','B-','O+','O-','AB+','AB-','Not sure'];
+const CONDS=['Diabetes','Hypertension','Asthma','Heart condition','Thyroid','Arthritis','Kidney condition','None'];
+const REASONS=['Managing a long-term condition','Planned surgery or treatment','Looking after my family and parents','Pregnancy or childcare','Understand my insurance cover','Keep all my records in one place','Other'];
+const REC_TYPES=['Discharge summary','Hospital bill','Lab report','Prescription','Scan or X-ray','ID proof','Vaccination record','Other'];
+const CLAIM_DOCS=['Discharge summary','Hospital bill','Lab report','Prescription','ID proof'];
+const INSURERS=['Star Health','HDFC ERGO','ICICI Lombard','Niva Bupa','Care Health','Bajaj Allianz','Other'];
+const RELATIONS=['Spouse','Child','Father','Mother','Other'];
+const CITIES=['Pune','Mumbai','Bengaluru','Chennai','Hyderabad','Delhi'];
+const SPECIALTIES=['Any','Orthopaedics','Cardiology','General medicine','Maternity','Diabetes care'];
+/* Sample, fictional hospitals for the prototype. Not real listings. */
+const HOSPITALS=[
+ {n:'City Care Hospital',c:'Pune',s:['Orthopaedics','General medicine','Cardiology'],i:['Star Health','HDFC ERGO','Niva Bupa'],room:4500},
+ {n:'Lake View Clinic',c:'Pune',s:['General medicine','Diabetes care'],i:['HDFC ERGO','Care Health'],room:3200},
+ {n:'Riverside Heart Institute',c:'Pune',s:['Cardiology'],i:['ICICI Lombard','Star Health'],room:7800},
+ {n:'Sunrise Mother and Child',c:'Pune',s:['Maternity'],i:['Niva Bupa','Bajaj Allianz','HDFC ERGO'],room:5200},
+ {n:'Harbour Multispecialty',c:'Mumbai',s:['Orthopaedics','Cardiology','General medicine'],i:['Star Health','ICICI Lombard','HDFC ERGO'],room:8500},
+ {n:'Marine Drive Diabetes Centre',c:'Mumbai',s:['Diabetes care','General medicine'],i:['Care Health','Niva Bupa'],room:4000},
+ {n:'Garden City Hospital',c:'Bengaluru',s:['Orthopaedics','General medicine','Maternity'],i:['Star Health','Niva Bupa','Care Health'],room:5000},
+ {n:'Tech Park Heart Care',c:'Bengaluru',s:['Cardiology'],i:['HDFC ERGO','ICICI Lombard'],room:7000},
+ {n:'Marina Medical Centre',c:'Chennai',s:['General medicine','Orthopaedics'],i:['Star Health','Bajaj Allianz'],room:4200},
+ {n:'Coromandel Women and Child',c:'Chennai',s:['Maternity'],i:['Star Health','Care Health'],room:4800},
+ {n:'Charminar General Hospital',c:'Hyderabad',s:['General medicine','Cardiology','Diabetes care'],i:['HDFC ERGO','Niva Bupa','Star Health'],room:4600},
+ {n:'Deccan Bone and Joint',c:'Hyderabad',s:['Orthopaedics'],i:['ICICI Lombard','Bajaj Allianz'],room:5500},
+ {n:'Capital Care Hospital',c:'Delhi',s:['General medicine','Cardiology','Orthopaedics'],i:['Star Health','HDFC ERGO','ICICI Lombard','Care Health'],room:9000},
+ {n:'Yamuna Family Clinic',c:'Delhi',s:['General medicine','Maternity','Diabetes care'],i:['Niva Bupa','Care Health'],room:3600}
+];
+
+/* ---------- storage ---------- */
+const KEY='hbw-prototype-v1';
+let DB={users:{}};
+try{const r=localStorage.getItem(KEY);if(r)DB=JSON.parse(r)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}};
+const FILES={}; /* files stay in memory for this session only */
+let ui={screen:'login',phone:'',err:'',regStep:1,draft:{conds:[]},draftRecs:[],tab:'home',view:null,viewId:null,city:'Pune',spec:'Any',onlyMine:false,recMember:'all',recType:'all',cdMember:'self',cdPolicy:'',timer:0,toast:''};
+let D=null; /* current user's data */
+
+/* ---------- formatting ---------- */
+const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const fmtDate=s=>{if(!s)return '';const d=new Date(s+(s.length===10?'T00:00:00':''));return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})};
+const age=s=>{const b=new Date(s),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return a};
+const size=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const today=()=>new Date().toISOString().slice(0,10);
+
+/* ---------- app state helpers ---------- */
+const member=id=>D.members.find(m=>m.id===id)||D.members[0];
+const confirmedPolicies=()=>D.policies.filter(p=>p.confirmed);
+function score(){
+  const checks=[
+    ['Profile created',true],
+    ['Emergency contact added',!!D.profile.ecPhone],
+    ['At least one policy confirmed',confirmedPolicies().length>0],
+    ['At least one record saved',D.records.length>0],
+    ['ID proof saved',D.records.some(r=>r.type==='ID proof')]
+  ];
+  return {checks,pct:Math.round(checks.filter(c=>c[1]).length/checks.length*100)};
+}
+function toast(t){ui.toast=t;draw();clearTimeout(toast.t);toast.t=setTimeout(()=>{ui.toast='';draw()},2400)}
+function go(patch){Object.assign(ui,patch);draw();const s=document.querySelector('.scroll');if(s)s.scrollTop=0}
+
+/* ---------- views ---------- */
+function loginView(){
+ return `<div class="scroll" style="padding:0">
+ <div class="hero"><div class="logo">${ic('shield')}</div><h1>Health-Benefits Wallet</h1><p>Know what your insurance covers, find care that accepts it, and keep your family's records in one place.</p></div>
+ <div class="stack" style="padding:20px 16px">
+  <div class="field"><label for="phone">Mobile number</label>
+   <div class="row"><span class="card" style="padding:11px 12px;font-weight:700">+91</span><input id="phone" inputmode="numeric" maxlength="10" placeholder="10-digit number" value="${esc(ui.phone)}" autocomplete="tel-national"></div>
+   ${ui.err?`<div class="err">${esc(ui.err)}</div>`:''}</div>
+  <button class="btn" data-act="sendOtp">Send OTP</button>
+  <div class="demo">Prototype mode. No SMS is sent. Any valid 10-digit number works, and the OTP is shown on the next screen.</div>
+  <div class="hr"></div>
+  <button class="btn alt" data-act="demo">Skip sign-in and open a demo profile</button>
+  <p class="small muted">Everything you enter stays in this browser only. Nothing is uploaded to a server.</p>
+ </div></div>`;
+}
+function otpView(){
+ return `<div class="topbar"><button class="back" data-act="toLogin" aria-label="Back">${ic('back')}</button><h2>Verify your number</h2></div>
+ <div class="scroll stack">
+  <p class="muted">Enter the 6-digit code for +91 ${esc(ui.phone)}.</p>
+  <div class="demo">Demo OTP: <b>123456</b></div>
+  <div class="field"><label for="otp">OTP</label><input id="otp" class="otp" inputmode="numeric" maxlength="6" placeholder="······" autocomplete="one-time-code">${ui.err?`<div class="err">${esc(ui.err)}</div>`:''}</div>
+  <button class="btn" data-act="verify">Verify and continue</button>
+  <button class="btn ghost" data-act="resend" ${ui.timer>0?'disabled':''}>${ui.timer>0?`Resend OTP in ${ui.timer}s`:'Resend OTP'}</button>
+ </div>`;
+}
+function regView(){
+ const d=ui.draft,st=ui.regStep;
+ const steps=`<div class="steps">${[1,2,3].map(i=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div>`;
+ let body='';
+ if(st===1){
+  body=`<h2>About you</h2><p class="muted small" style="margin:4px 0 14px">Step 1 of 3. We use this to fill your emergency card and claim forms.</p>
+  <div class="field"><label for="name">Full name</label><input id="name" value="${esc(d.name)}" autocomplete="name"></div>
+  <div class="field"><label for="dob">Date of birth</label><input id="dob" type="date" max="${today()}" value="${esc(d.dob)}"></div>
+  <div class="field"><label for="gender">Gender</label><select id="gender"><option value="">Select</option>${['Female','Male','Other','Prefer not to say'].map(g=>`<option ${d.gender===g?'selected':''}>${g}</option>`).join('')}</select></div>
+  <div class="field"><label for="blood">Blood group</label><select id="blood"><option value="">Select</option>${BG.map(g=>`<option ${d.blood===g?'selected':''}>${g}</option>`).join('')}</select></div>`;
+ } else if(st===2){
+  body=`<h2>Your health</h2><p class="muted small" style="margin:4px 0 14px">Step 2 of 3. Share only what you are comfortable with.</p>
+  <div class="field"><label for="reason">Why are you using the wallet?</label><select id="reason"><option value="">Select a reason</option>${REASONS.map(g=>`<option ${d.reason===g?'selected':''}>${g}</option>`).join('')}</select></div>
+  <div class="field"><label>Existing conditions</label><div class="chips">${CONDS.map(c=>`<button type="button" class="chip ${d.conds.includes(c)?'on':''}" data-act="cond" data-v="${c}">${c}</button>`).join('')}</div></div>
+  <div class="field"><label for="allergy">Allergies</label><input id="allergy" placeholder="For example penicillin, peanuts" value="${esc(d.allergy)}"></div>
+  <div class="field"><label for="meds">Current medicines</label><textarea id="meds" placeholder="Name and dose, one per line">${esc(d.meds)}</textarea></div>
+  <div class="field"><label for="ecName">Emergency contact name</label><input id="ecName" value="${esc(d.ecName)}"></div>
+  <div class="field"><label for="ecPhone">Emergency contact mobile</label><input id="ecPhone" inputmode="numeric" maxlength="10" value="${esc(d.ecPhone)}"></div>`;
+ } else {
+  body=`<h2>Past medical records</h2><p class="muted small" style="margin:4px 0 14px">Step 3 of 3. Upload old reports, bills or prescriptions now, or skip and add them later.</p>
+  ${uploadForm('reg')}
+  ${ui.draftRecs.length?`<div class="stack" style="margin-top:14px">${ui.draftRecs.map((r,i)=>`<div class="card row between"><div class="row">${ic('file')}<div><b>${esc(r.type)}</b><div class="small muted">${esc(r.name)} · ${size(r.size)}</div></div></div><button class="btn ghost" data-act="rmDraftRec" data-i="${i}">Remove</button></div>`).join('')}</div>`:''}`;
+ }
+ return `<div class="topbar">${st>1?`<button class="back" data-act="regBack" aria-label="Back">${ic('back')}</button>`:''}<h2>Create your profile</h2></div>
+ <div class="scroll">${steps}${body}${ui.err?`<div class="err" style="margin-bottom:10px">${esc(ui.err)}</div>`:''}
+ <button class="btn" data-act="regNext">${st<3?'Continue':'Finish and open my wallet'}</button>
+ ${st===3?`<button class="btn ghost" style="width:100%;margin-top:6px" data-act="regNext">Skip for now</button>`:''}
+ </div>`;
+}
+function uploadForm(mode,memberSel){
+ return `<div class="stack">
+  ${memberSel?`<div><label for="upMember">For</label><select id="upMember">${D.members.map(m=>`<option value="${m.id}">${esc(m.name)} (${esc(m.relation)})</option>`).join('')}</select></div>`:''}
+  <div><label for="upType">Record type</label><select id="upType">${REC_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
+  ${memberSel?`<div><label for="upDate">Date of record</label><input id="upDate" type="date" max="${today()}" value="${today()}"></div>`:''}
+  <label class="drop" id="dropzone" for="upFile">${ic('upload')}<div>Tap to choose a file, or drop it here</div><div class="small muted" style="font-weight:500">PDF, JPG or PNG</div><input id="upFile" type="file" accept=".pdf,.jpg,.jpeg,.png,image/*,application/pdf"></label>
+  <div id="upName" class="small muted"></div>
+  <button class="btn alt" data-act="${mode==='reg'?'addDraftRec':'saveRecord'}">${mode==='reg'?'Add this record':'Save to wallet'}</button>
+ </div>`;
+}
+function ringScore(){
+ const s=score();
+ return `<div class="score"><div class="row" style="gap:14px"><div class="ring" style="--p:${s.pct}"><b>${s.pct}%</b></div>
+ <div><h3>Claim-ready</h3><p class="small muted">Could you file a claim today with nothing missing?</p></div></div>
+ <div class="stack" style="gap:8px;margin-top:14px">${s.checks.map(c=>`<div class="check"><span class="dot ${c[1]?'done':''}">${c[1]?ic('check'):''}</span>${c[0]}</div>`).join('')}</div></div>`;
+}
+function nextStep(){
+ const s=score();const c=s.checks;
+ if(!c[2][1])return {t:'Add your insurance policy',b:'Upload it and we will list the cover in plain words.',a:'addPolicy',l:'Add policy'};
+ if(!c[1][1])return {t:'Add an emergency contact',b:'Someone to call if you cannot.',a:'tabProfile',l:'Open profile'};
+ const miss=CLAIM_DOCS.find(t=>!D.records.some(r=>r.member===D.members[0].id&&r.type===t));
+ if(miss)return {t:'Complete your claim pack',b:'One document is still missing: '+miss.toLowerCase()+'.',a:'addRecord',l:'Add '+miss.toLowerCase()};
+ return {t:'You are claim-ready',b:'Every key document is saved. Open the claim pack any time you need it.',a:'openClaim',l:'View claim pack'};
+}
+function homeView(){
+ const p=D.profile,pol=confirmedPolicies();
+ const pending=D.policies.filter(x=>!x.confirmed);
+ return `<div class="scroll stack">
+  <div><p class="muted small">Hello,</p><h1>${esc(p.name.split(' ')[0])}</h1></div>
+  ${ringScore()}
+  ${(()=>{const n=nextStep();return `<div class="card tint stack" style="gap:6px"><span class="tag">Next step</span><b>${n.t}</b><p class="small">${n.b}</p><button class="btn sm" data-act="${n.a}">${n.l}</button></div>`})()}
+  <button class="tile" style="width:100%;flex-direction:row;align-items:center;justify-content:space-between;background:var(--bad-bg);border-color:#F4B7B0" data-act="emergency"><span class="row">${ic('alert')}<span>Emergency card<br><span class="small muted" style="font-weight:500">Blood group, allergies, who to call</span></span></span><span class="pill bad">${esc(p.blood)}</span></button>
+  ${pending.length?`<div class="card" style="background:var(--warn-bg);border-color:#F6D58A"><b>${pending.length} policy waiting for your check</b><p class="small" style="margin:4px 0 10px">Confirm the details we read so answers can be trusted.</p><button class="btn sm" data-act="openPolicy" data-id="${pending[0].id}">Review now</button></div>`:''}
+  <div class="grid2">
+   <button class="tile" data-act="tab" data-t="policies">${ic('shield')}My cover<span class="small muted" style="font-weight:500">${pol.length?pol.length+' policy confirmed':'Add your first policy'}</span></button>
+   <button class="tile" data-act="tab" data-t="care">${ic('pin')}Find care<span class="small muted" style="font-weight:500">Hospitals near you</span></button>
+   <button class="tile" data-act="tab" data-t="records">${ic('folder')}Records<span class="small muted" style="font-weight:500">${D.records.length} saved</span></button>
+   <button class="tile" data-act="openClaim">${ic('claim')}Claim pack<span class="small muted" style="font-weight:500">See what is missing</span></button>
+  </div>
+  ${pol.map(x=>{const days=Math.ceil((new Date(x.f.waitEnd)-new Date())/86400000);return days>0?`<div class="card tint row">${ic('alert')}<div><b>Waiting period ends in ${days} days</b><div class="small">${esc(x.insurer)} · ${fmtDate(x.f.waitEnd)}</div></div></div>`:''}).join('')}
+  <p class="small muted">This is a prototype with sample data for hospitals and policy reading.</p>
+ </div>`;
+}
+function policiesView(){
+ return `<div class="topbar"><h2>My cover</h2><button class="btn sm" data-act="addPolicy">${ic('plus')} Add</button></div>
+ <div class="scroll stack">
+ ${D.policies.length?D.policies.map(p=>`<button class="card" style="text-align:left;cursor:pointer" data-act="openPolicy" data-id="${p.id}">
+   <div class="row between"><b>${esc(p.insurer)}</b><span class="pill ${p.confirmed?'ok':'warn'}">${p.confirmed?'Confirmed':'Needs your check'}</span></div>
+   <div class="small muted">${esc(p.type)} · ${esc(member(p.holder).name)}${p.number?' · '+esc(p.number):''}</div>
+   <div class="kv" style="margin-top:10px"><span>Sum insured</span><span>${inr(p.f.sum)}</span><span>Room rent limit</span><span>${inr(p.f.room)} a day</span><span>Co-pay</span><span>${p.f.copay}%</span></div></button>`).join('')
+ :`<div class="card tint stack"><b>No policy yet</b><p class="small">Upload your policy and we will pull out the sum insured, room-rent limit, co-pay and waiting periods in plain words.</p><button class="btn" data-act="addPolicy">Add a policy</button></div>`}
+ </div>`;
+}
+function addPolicyView(){
+ return `<div class="topbar"><button class="back" data-act="closeView" aria-label="Back">${ic('back')}</button><h2>Add a policy</h2></div>
+ <div class="scroll stack">
+  <div><label for="pIns">Insurer</label><select id="pIns">${INSURERS.map(i=>`<option>${i}</option>`).join('')}</select></div>
+  <div><label for="pType">Type of cover</label><select id="pType"><option>Employer group cover</option><option>Individual or family floater</option><option>Parents' policy</option></select></div>
+  <div><label for="pHolder">Who is covered?</label><select id="pHolder">${D.members.map(m=>`<option value="${m.id}">${esc(m.name)} (${esc(m.relation)})</option>`).join('')}</select></div>
+  <div><label for="pNo">Policy number (optional)</label><input id="pNo"></div>
+  <label class="drop" for="pFile">${ic('upload')}<div>Upload the policy PDF or photo</div><input id="pFile" type="file" accept=".pdf,.jpg,.jpeg,.png,image/*,application/pdf"></label>
+  <div id="pFileName" class="small muted"></div>
+  <div class="demo">Prototype: the reader below fills in sample values. In the real product it would pull them from your file, and you would confirm each one.</div>
+  <button class="btn" data-act="readPolicy">Read my policy</button>
+ </div>`;
+}
+function policyView(){
+ const p=D.policies.find(x=>x.id===ui.viewId);if(!p)return '';
+ const f=p.f;
+ const fld=(k,l,t,pg)=>`<div class="field"><label for="f_${k}">${l} <span class="muted" style="font-weight:500">· policy page ${pg}</span></label><input id="f_${k}" type="${t}" value="${esc(f[k])}" ${p.confirmed?'':''}></div>`;
+ return `<div class="topbar"><button class="back" data-act="closeView" aria-label="Back">${ic('back')}</button><h2>${esc(p.insurer)}</h2><span class="pill ${p.confirmed?'ok':'warn'}">${p.confirmed?'Confirmed':'Check me'}</span></div>
+ <div class="scroll stack">
+  ${p.confirmed?'':`<div class="demo">Sample values, for demonstration. Check each field against your policy, edit what is wrong, then confirm.</div>`}
+  <div class="card">
+   ${fld('sum','Sum insured (₹)','number',3)}${fld('room','Room rent limit per day (₹)','number',12)}${fld('copay','Co-pay (%)','number',12)}${fld('waitEnd','Initial waiting period ends','date',9)}${fld('ped','Pre-existing disease waiting (months)','number',9)}
+   <div class="field"><label for="f_excl">Main exclusions · policy page 15</label><textarea id="f_excl">${esc(f.excl)}</textarea></div>
+   <button class="btn" data-act="confirmPolicy" data-id="${p.id}">${p.confirmed?'Save changes':'Confirm these details'}</button>
+  </div>
+  ${p.confirmed?calcCard(p):''}
+  ${p.confirmed?`<button class="btn alt" data-act="openClaim">Prepare a claim pack</button>`:''}
+  <button class="btn ghost" style="color:var(--bad)" data-act="delPolicy" data-id="${p.id}">Remove this policy</button>
+ </div>`;
+}
+function calcCard(p){
+ return `<div class="card stack"><h3>What would I pay?</h3><p class="small muted">A rough estimate from your confirmed fields. Real claims depend on the full policy wording and the insurer.</p>
+  <div class="grid2"><div><label for="cBill">Total hospital bill (₹)</label><input id="cBill" type="number" inputmode="numeric" value="200000"></div><div><label for="cRoom">Room rent a day (₹)</label><input id="cRoom" type="number" inputmode="numeric" value="7000"></div></div>
+  <button class="btn alt" data-act="calc" data-id="${p.id}">Estimate</button><div id="calcOut"></div></div>`;
+}
+function careView(){
+ const mine=confirmedPolicies().map(p=>p.insurer);
+ let list=HOSPITALS.filter(h=>h.c===ui.city&&(ui.spec==='Any'||h.s.includes(ui.spec)));
+ const acc=h=>mine.length?h.i.some(i=>mine.includes(i)):null;
+ if(ui.onlyMine&&mine.length)list=list.filter(h=>acc(h));
+ const limit=confirmedPolicies()[0]?confirmedPolicies()[0].f.room:null;
+ return `<div class="topbar"><h2>Find care</h2></div>
+ <div class="scroll stack">
+  <div class="grid2"><div><label for="city">City</label><select id="city" data-act="careF">${CITIES.map(c=>`<option ${c===ui.city?'selected':''}>${c}</option>`).join('')}</select></div>
+  <div><label for="spec">Specialty</label><select id="spec" data-act="careF">${SPECIALTIES.map(c=>`<option ${c===ui.spec?'selected':''}>${c}</option>`).join('')}</select></div></div>
+  <label class="row" style="font-weight:500"><input type="checkbox" id="onlyMine" data-act="careF" style="width:20px;height:20px" ${ui.onlyMine?'checked':''}> Only show hospitals that accept my policy</label>
+  ${mine.length?'':`<div class="card tint small">Add and confirm a policy to see which hospitals accept it.</div>`}
+  ${list.length?list.map(h=>{const a=acc(h);return `<div class="card stack" style="gap:8px"><div class="row between"><b>${esc(h.n)}</b>${a===null?'<span class="pill gray">Add a policy</span>':a?'<span class="pill ok">Accepts your policy</span>':'<span class="pill bad">Not on your list</span>'}</div>
+   <div class="small muted">${esc(h.c)} · ${h.s.join(', ')}</div>
+   <div class="small">Standard room from <b>${inr(h.room)}</b> a day${limit?(h.room<=limit?` · fits your ${inr(limit)} limit`:` · above your ${inr(limit)} limit`):''}</div>
+   <div class="small muted">Network last checked 12 Nov 2026 · sample data</div></div>`}).join(''):`<div class="card">No hospitals match. Try another specialty or turn the filter off.</div>`}
+  <p class="small muted">Hospital names and details are made-up samples for this prototype.</p>
+ </div>`;
+}
+function recordsView(){
+ let list=D.records.filter(r=>(ui.recMember==='all'||r.member===ui.recMember)&&(ui.recType==='all'||r.type===ui.recType)&&(!ui.recQ||(r.type+' '+r.name+' '+member(r.member).name).toLowerCase().includes(ui.recQ.toLowerCase()))).sort((a,b)=>b.date.localeCompare(a.date));
+ return `<div class="topbar"><h2>Records</h2><button class="btn sm" data-act="addRecord">${ic('plus')} Add</button></div>
+ <div class="scroll stack">
+  <div class="chips"><button class="chip ${ui.recMember==='all'?'on':''}" data-act="recM" data-v="all">Everyone</button>${D.members.map(m=>`<button class="chip ${ui.recMember===m.id?'on':''}" data-act="recM" data-v="${m.id}">${esc(m.name.split(' ')[0])}</button>`).join('')}</div>
+  <input id="recQ" type="search" placeholder="Search records, for example lab or Mohan" aria-label="Search records" value="${esc(ui.recQ||'')}"><select id="recType" data-act="recT" aria-label="Filter by type"><option value="all">All record types</option>${REC_TYPES.map(t=>`<option ${ui.recType===t?'selected':''}>${t}</option>`).join('')}</select>
+  ${list.length?list.map(r=>`<button class="card row between" style="text-align:left;cursor:pointer;width:100%" data-act="openRecord" data-id="${r.id}"><div class="row">${ic('file')}<div><b>${esc(r.type)}</b><div class="small muted">${esc(member(r.member).name)} · ${fmtDate(r.date)}</div><div class="small muted">${esc(r.name)}</div></div></div><span class="small muted">${size(r.size)}</span></button>`).join(''):`<div class="card tint stack"><b>Nothing here yet</b><p class="small">Add reports, bills and prescriptions. They turn into a claim pack when you need one.</p><button class="btn" data-act="addRecord">Add a record</button></div>`}
+ </div>`;
+}
+function addRecordView(){
+ return `<div class="topbar"><button class="back" data-act="closeView" aria-label="Back">${ic('back')}</button><h2>Add a record</h2></div><div class="scroll">${uploadForm('app',true)}</div>`;
+}
+function claimView(){
+ const pols=confirmedPolicies();
+ const mid=ui.cdMember||'self';
+ const have=CLAIM_DOCS.map(t=>({t,n:D.records.filter(r=>r.member===mid&&r.type===t).length}));
+ const got=have.filter(h=>h.n>0).length,pct=Math.round(got/CLAIM_DOCS.length*100);
+ return `<div class="topbar"><button class="back" data-act="closeView" aria-label="Back">${ic('back')}</button><h2>Claim pack</h2></div>
+ <div class="scroll stack">
+  <div class="grid2"><div><label for="cdM">Patient</label><select id="cdM" data-act="cdF">${D.members.map(m=>`<option value="${m.id}" ${m.id===mid?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+  <div><label for="cdP">Policy</label><select id="cdP" data-act="cdF">${pols.length?pols.map(p=>`<option value="${p.id}" ${p.id===ui.cdPolicy?'selected':''}>${esc(p.insurer)}</option>`).join(''):'<option value="">None yet</option>'}</select></div></div>
+  <div class="card stack"><div class="row between"><b>${got} of ${CLAIM_DOCS.length} documents ready</b><span class="pill ${pct===100?'ok':'warn'}">${pct}%</span></div><div class="bar"><i style="width:${pct}%"></i></div>
+   ${have.map(h=>`<div class="row between"><div class="row"><span class="dot done" style="background:${h.n?'var(--teal)':'var(--warn-bg)'};color:${h.n?'#fff':'var(--warn)'}">${h.n?ic('check'):ic('alert')}</span>${h.t}</div><span class="small ${h.n?'muted':''}" style="${h.n?'':'color:var(--warn);font-weight:700'}">${h.n?h.n+' saved':'Missing'}</span></div>`).join('')}
+  </div>
+  ${pols.length?'':`<div class="card tint small">Confirm a policy first so the pack names the right insurer.</div>`}
+  <button class="btn" data-act="copyPack">Copy pack summary</button>
+  <button class="btn alt" data-act="addRecord">Add a missing document</button>
+  <p class="small muted">The prototype builds a checklist and summary. Sending to an insurer or TPA is not part of this version.</p>
+ </div>`;
+}
+function profileView(){
+ const p=D.profile;
+ return `<div class="topbar"><h2>Profile</h2></div>
+ <div class="scroll stack">
+  <div class="card"><div class="row between"><h3>${esc(p.name)}</h3><span class="pill ok">${esc(p.blood)}</span></div>
+   <div class="kv" style="margin-top:10px"><span>Age</span><span>${age(p.dob)} years</span><span>Date of birth</span><span>${fmtDate(p.dob)}</span><span>Gender</span><span>${esc(p.gender)}</span><span>Mobile</span><span>+91 ${esc(D.phone)}</span></div></div>
+  <div class="card"><h3>Health summary</h3><div class="kv" style="margin-top:10px"><span>Using the wallet for</span><span>${esc(p.reason)}</span><span>Conditions</span><span>${esc(p.conds.join(', ')||'None')}</span><span>Allergies</span><span>${esc(p.allergy||'None noted')}</span><span>Medicines</span><span>${esc((p.meds||'None noted').replace(/\n/g,', '))}</span></div></div>
+  <div class="card tint"><h3>Emergency contact</h3><p style="margin-top:6px">${esc(p.ecName||'Not added')}${p.ecPhone?' · +91 '+esc(p.ecPhone):''}</p></div>
+  <div class="card stack"><h3>Family members</h3>${D.members.map(m=>`<div class="row between"><span>${esc(m.name)}</span><span class="pill gray">${esc(m.relation)}</span></div>`).join('')}
+   <div class="hr"></div><div class="grid2"><input id="mName" placeholder="Name" aria-label="Family member name"><select id="mRel" aria-label="Relation">${RELATIONS.map(r=>`<option>${r}</option>`).join('')}</select></div><button class="btn alt" data-act="addMember">Add family member</button></div>
+  <div class="card small"><b>Privacy</b><p class="muted" style="margin-top:4px">In the real product, your employer would only ever see anonymous totals, never your records. In this prototype everything stays in your browser.</p></div>
+  <button class="btn alt" data-act="tour">Take the quick tour</button>
+  <button class="btn alt" data-act="logout">Sign out</button>
+  <button class="btn ghost" style="color:var(--bad)" data-act="wipe">Delete all my data</button>
+ </div>`;
+}
+function appView(){
+ let main='';
+ if(ui.view==='addPolicy')main=addPolicyView();
+ else if(ui.view==='policy')main=policyView();
+ else if(ui.view==='addRecord')main=addRecordView();
+ else if(ui.view==='claim')main=claimView();
+ else main={home:homeView,policies:policiesView,care:careView,records:recordsView,profile:profileView}[ui.tab]();
+ const nav=[['home','home','Home'],['policies','shield','Cover'],['care','pin','Care'],['records','folder','Records'],['profile','user','Profile']];
+ return main+`<nav class="nav" aria-label="Main">${nav.map(n=>`<button class="${ui.tab===n[0]&&!ui.view?'on':''}" data-act="tab" data-t="${n[0]}">${ic(n[1])}${n[2]}</button>`).join('')}</nav>`;
+}
+function draw(){
+ const f=document.activeElement&&document.activeElement.id;
+ let h={login:loginView,otp:otpView,reg:regView,app:()=>appView()}[ui.screen]();
+ $('#app').innerHTML=h;
+ $('#layer').innerHTML=(ui.modal||'')+(ui.toast?`<div class="toast" role="status">${esc(ui.toast)}</div>`:'');
+ bindDrop();
+}
+function bindDrop(){
+ const dz=$('#dropzone'),fi=$('#upFile');
+ if(fi){fi.addEventListener('change',()=>{$('#upName').textContent=fi.files[0]?fi.files[0].name+' · '+size(fi.files[0].size):''});}
+ if(dz){['dragover','dragenter'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.add('hot')}));['dragleave','drop'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.remove('hot')}));
+  dz.addEventListener('drop',ev=>{if(ev.dataTransfer.files[0]){fi.files=ev.dataTransfer.files;fi.dispatchEvent(new Event('change'))}});}
+ const pf=$('#pFile');if(pf)pf.addEventListener('change',()=>{$('#pFileName').textContent=pf.files[0]?pf.files[0].name+' · '+size(pf.files[0].size):''});
+}
+
+/* ---------- actions ---------- */
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+function readDraft(){
+ const d=ui.draft;
+ if(ui.regStep===1){d.name=val('name');d.dob=val('dob');d.gender=val('gender');d.blood=val('blood')}
+ if(ui.regStep===2){d.reason=val('reason');d.allergy=val('allergy');d.meds=val('meds');d.ecName=val('ecName');d.ecPhone=val('ecPhone')}
+}
+function startTimer(){ui.timer=30;clearInterval(startTimer.i);startTimer.i=setInterval(()=>{ui.timer--;const b=document.querySelector('[data-act=resend]');if(b&&ui.screen==='otp'){b.disabled=ui.timer>0;b.textContent=ui.timer>0?'Resend OTP in '+ui.timer+'s':'Resend OTP'}if(ui.timer<=0)clearInterval(startTimer.i)},1000)}
+function openUser(phone){
+ if(!DB.users[phone])return false;D=DB.users[phone];try{localStorage.setItem('hbw-last',phone)}catch(e){}
+ if(!D.members.find(m=>m.id==='self'))D.members.unshift({id:'self',name:D.profile.name,relation:'Self'});
+ ui.cdMember='self';const c=confirmedPolicies()[0];ui.cdPolicy=c?c.id:'';
+ go({screen:'app',tab:'home',view:null,err:''});if(!tourSeen())setTimeout(()=>showTour(0),400);return true;
+}
+function seedDemo(){
+ const ph='9876543210';
+ if(DB.users[ph]){ui.phone=ph;openUser(ph);return}
+ const R=(id,member,type,date,name)=>({id,member,type,date,name,size:120000+Math.floor(Math.random()*90000),dummy:true});
+ DB.users[ph]={phone:ph,profile:{name:'Rahul Yadav',dob:'2001-08-14',gender:'Male',blood:'O+',reason:'Understand my insurance cover',conds:['None'],allergy:'Dust',meds:'None at the moment',ecName:'Sunita Yadav',ecPhone:'9812345670'},
+  members:[{id:'self',name:'Rahul Yadav',relation:'Self'},{id:'dad',name:'Mohan Yadav',relation:'Father'},{id:'mom',name:'Sunita Yadav',relation:'Mother'}],
+  policies:[{id:'p1',insurer:'HDFC ERGO',type:'Employer group cover',number:'GRP-48210',holder:'self',confirmed:true,file:'group-policy.pdf',f:{sum:1000000,room:5000,copay:10,waitEnd:'2027-03-14',ped:36,excl:'Cosmetic surgery, dental unless accident, infertility treatment'}}],
+  records:[
+   R('r1','self','Discharge summary','2026-08-19','discharge-summary-aug-2026.png'),
+   R('r2','self','Lab report','2026-08-18','blood-test-cbc-aug-2026.png'),
+   R('r3','self','Prescription','2026-08-19','prescription-wrist-injury.png'),
+   R('r4','self','ID proof','2026-01-10','id-proof-sample.png'),
+   R('r5','self','Vaccination record','2025-11-02','tetanus-booster.png'),
+   R('r6','dad','Lab report','2026-09-02','hba1c-sep-2026.png'),
+   R('r7','dad','Prescription','2026-10-11','cardiology-visit.png'),
+   R('r8','mom','Prescription','2026-07-05','general-checkup.png')]};
+ save();ui.phone=ph;openUser(ph);
+}
+/* Draws a sample document so dummy records can really be opened. */
+function drawDoc(r){
+ const m=member(r.member),c=document.createElement('canvas');c.width=800;c.height=1040;const g=c.getContext('2d');
+ g.fillStyle='#fff';g.fillRect(0,0,800,1040);
+ g.fillStyle='#0F766E';g.fillRect(0,0,800,110);
+ g.fillStyle='#fff';g.font='700 30px sans-serif';g.fillText('City Care Hospital',40,56);g.font='16px sans-serif';g.fillText('Pune  |  Sample document with dummy data',40,86);
+ g.fillStyle='#134E4A';g.font='700 28px sans-serif';g.fillText(r.type.toUpperCase(),40,170);
+ g.font='17px sans-serif';g.fillStyle='#0E2A28';
+ g.fillText('Patient: '+m.name,40,210);g.fillText('Date: '+fmtDate(r.date),40,238);g.fillText('Ref: HB-'+r.id.toUpperCase().slice(0,5),520,210);
+ g.fillStyle='#D3E8E4';g.fillRect(40,258,720,2);
+ const T={
+ 'Lab report':[['Test','Result','Normal range'],['Haemoglobin','14.2 g/dL','13.0 - 17.0'],['WBC count','7,200 /uL','4,000 - 11,000'],['Platelets','2.4 lakh /uL','1.5 - 4.5 lakh'],['Fasting glucose','92 mg/dL','70 - 100'],['HbA1c','5.4 %','below 5.7'],['Creatinine','0.9 mg/dL','0.7 - 1.3']],
+ 'Prescription':[['Medicine','Dose','Days'],['Paracetamol 650 mg','1 tablet, twice a day','5'],['Calcium with vitamin D','1 tablet, after lunch','30'],['Pantoprazole 40 mg','1 tablet, before breakfast','7'],['Review after 2 weeks','','']],
+ 'Discharge summary':[['Item','Details',''],['Admitted','17 Aug 2026','' ],['Discharged',fmtDate(r.date),''],['Diagnosis','Fracture, left wrist (road accident)',''],['Treatment','Closed reduction and cast',''],['Advice','Rest, cast care, review in 2 weeks','']],
+ 'Hospital bill':[['Item','Amount',''],['Room (2 days)','Rs 9,000',''],['Procedure','Rs 38,000',''],['Medicines','Rs 6,400',''],['Total','Rs 53,400','']],
+ 'Vaccination record':[['Vaccine','Date','Dose'],['Tetanus booster',fmtDate(r.date),'1'],['Hepatitis B','2019','3 of 3']],
+ 'ID proof':[['Identity proof (sample placeholder)','',''],['Name',m.name,''],['Date of birth','See profile',''],['Not a real ID document','','']]
+ }[r.type]||[['Sample record','',''],['Details','Dummy data for the prototype','']];
+ let y=300;
+ T.forEach((row,i)=>{g.font=(i===0?'700 ':'')+'18px sans-serif';g.fillStyle=i===0?'#0F766E':'#0E2A28';g.fillText(row[0],40,y);g.fillText(row[1],340,y);g.fillText(row[2],590,y);y+=i===0?20:0;g.fillStyle='#E3EFEC';g.fillRect(40,y+8,720,1);y+=42});
+ g.save();g.translate(400,720);g.rotate(-0.5);g.fillStyle='rgba(15,118,110,.12)';g.font='700 64px sans-serif';g.textAlign='center';g.fillText('SAMPLE',0,0);g.restore();
+ g.fillStyle='#5B7370';g.font='14px sans-serif';g.fillText('Dummy document for prototype demonstration. Not a medical record.',40,1000);
+ return c.toDataURL('image/png');
+}
+function dataToBlob(d){const [h,b]=d.split(',');const mime=h.match(/:(.*?);/)[1];const bin=atob(b),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:mime})}
+function keepCopy(rec,file){const fr=new FileReader();fr.onload=()=>{if(fr.result.length<1.6e6){rec.data=fr.result;save()}};fr.readAsDataURL(file)}
+async function renderPdf(file){
+ const box=$('#pdfBox');if(!box)return;
+ try{
+  if(!window.pdfjsLib){await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});
+   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}
+  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  box.innerHTML='';const n=Math.min(pdf.numPages,8),w=box.clientWidth||340;
+  for(let i=1;i<=n;i++){const pg=await pdf.getPage(i),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:w/v0.width*(window.devicePixelRatio||1)});
+   const cv=document.createElement('canvas');cv.width=v.width;cv.height=v.height;cv.style.cssText='width:100%;display:block;border:1px solid var(--line);border-radius:8px;margin-bottom:8px';
+   box.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:v}).promise}
+  if(pdf.numPages>n)box.insertAdjacentHTML('beforeend','<p class="small muted">Showing the first '+n+' of '+pdf.numPages+' pages.</p>');
+ }catch(e){box.innerHTML=`<iframe title="PDF preview" src="${URL.createObjectURL(file)}" style="width:100%;height:60vh;border:1px solid var(--line);border-radius:8px"></iframe>`}
+}
+function addRecordFrom(memberId,typeId,dateVal){
+ const fi=$('#upFile');const file=fi&&fi.files[0];
+ if(!file){ui.err='Choose a file first.';return null}
+ const rec={id:uid(),member:memberId,type:val(typeId),date:dateVal||today(),name:file.name,size:file.size};
+ FILES[rec.id]=file;keepCopy(rec,file);return rec;
+}
+function modal(html){ui.modal=`<div class="modal" data-act="closeModal"><div class="sheet" data-stop="1">${html}</div></div>`;draw()}
+const TOUR=[['Your claim-ready score','The ring shows how prepared you are to file a claim today. The next-step card tells you the one thing to do next.'],['Add and confirm your policy','Upload your policy. We list the sum insured, room-rent limit and co-pay in plain words. You check them, then confirm.'],['Find care that accepts it','Pick a city and specialty. Hospitals that accept your policy are marked, with room rents compared to your limit.'],['Keep records, build a claim pack','Save reports and bills for the whole family. The claim pack shows what is missing before you file.']];
+const tourSeen=()=>{try{return localStorage.getItem('hbw-tour')==='1'}catch(e){return false}};
+function showTour(i){const t=TOUR[i],last=i===TOUR.length-1;
+ modal(`<div class="stack"><span class="tag">Quick tour · ${i+1} of ${TOUR.length}</span><h3>${t[0]}</h3><p>${t[1]}</p><div class="steps">${TOUR.map((_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div>
+ <button class="btn" data-act="${last?'tourEnd':'tourNext'}" data-i="${i+1}">${last?'Start exploring':'Next'}</button>${last?'':`<button class="btn ghost" style="width:100%" data-act="tourEnd">Skip tour</button>`}</div>`)}
+const acts={
+ tour(){showTour(0)},
+ tourNext(el){showTour(+el.dataset.i)},
+ tourEnd(){try{localStorage.setItem('hbw-tour','1')}catch(e){}ui.modal='';draw()},
+ tabProfile(){go({tab:'profile',view:null})},
+ emergency(){const p=D.profile;modal(`<div class="stack"><div class="row between"><h3>Emergency card</h3><button class="btn ghost" data-act="closeModal">Close</button></div>
+  <div class="card" style="background:var(--bad-bg);border-color:#F4B7B0;text-align:center"><div class="small muted">Blood group</div><div style="font-family:var(--font-display);font-size:44px;font-weight:700;color:var(--bad)">${esc(p.blood)}</div><b>${esc(p.name)}</b><div class="small">${age(p.dob)} years · ${esc(p.gender)}</div></div>
+  <div class="kv"><span>Allergies</span><span>${esc(p.allergy||'None noted')}</span><span>Conditions</span><span>${esc(p.conds.join(', ')||'None')}</span><span>Medicines</span><span>${esc((p.meds||'None noted').replace(/\n/g,', '))}</span><span>Call</span><span>${esc(p.ecName||'Not added')}${p.ecPhone?' · +91 '+esc(p.ecPhone):''}</span></div></div>`)},
+ sendOtp(){const p=val('phone').replace(/\D/g,'');if(!/^[6-9]\d{9}$/.test(p)){ui.phone=p;go({err:'Enter a valid 10-digit Indian mobile number, starting with 6, 7, 8 or 9.'});return}
+  startTimer();go({phone:p,screen:'otp',err:''})},
+ toLogin(){go({screen:'login',err:''})},
+ resend(){startTimer();toast('A new demo OTP is 123456')},
+ verify(){if(val('otp')!=='123456'){go({err:'That code is not right. Use the demo OTP 123456.'});return}
+  if(!openUser(ui.phone))go({screen:'reg',regStep:1,draft:{conds:[]},draftRecs:[],err:''})},
+ demo:seedDemo,
+ cond(el){const d=ui.draft,v=el.dataset.v;readDraft();if(v==='None'){d.conds=d.conds.includes('None')?[]:['None']}else{d.conds=d.conds.filter(x=>x!=='None');d.conds=d.conds.includes(v)?d.conds.filter(x=>x!==v):d.conds.concat(v)}draw()},
+ regBack(){readDraft();go({regStep:ui.regStep-1,err:''})},
+ addDraftRec(){const fi=$('#upFile'),f=fi&&fi.files[0];if(!f){ui.err='Choose a file first.';draw();return}
+  const rec={type:val('upType'),name:f.name,size:f.size,file:f};ui.draftRecs.push(rec);ui.err='';draw()},
+ rmDraftRec(el){ui.draftRecs.splice(+el.dataset.i,1);draw()},
+ regNext(){readDraft();const d=ui.draft,st=ui.regStep;
+  if(st===1){if(d.name.length<2)return go({err:'Enter your full name.'});if(!d.dob||new Date(d.dob)>new Date())return go({err:'Enter a valid date of birth.'});if(!d.gender)return go({err:'Select your gender.'});if(!d.blood)return go({err:'Select your blood group, or choose Not sure.'});go({regStep:2,err:''});return}
+  if(st===2){if(!d.reason)return go({err:'Tell us why you are using the wallet.'});if(d.ecPhone&&!/^[6-9]\d{9}$/.test(d.ecPhone))return go({err:'Emergency contact number must be 10 digits.'});go({regStep:3,err:''});return}
+  const recs=ui.draftRecs.map(r=>{const o={id:uid(),member:'self',type:r.type,date:today(),name:r.name,size:r.size};FILES[o.id]=r.file;keepCopy(o,r.file);return o});
+  DB.users[ui.phone]={phone:ui.phone,profile:{name:d.name,dob:d.dob,gender:d.gender,blood:d.blood,reason:d.reason,conds:d.conds,allergy:d.allergy,meds:d.meds,ecName:d.ecName,ecPhone:d.ecPhone},members:[{id:'self',name:d.name,relation:'Self'}],policies:[],records:recs};
+  save();openUser(ui.phone);toast('Welcome, '+d.name.split(' ')[0]+'. Your wallet is ready.')},
+ tab(el){go({tab:el.dataset.t,view:null})},
+ closeView(){go({view:null})},
+ addPolicy(){go({view:'addPolicy'})},
+ readPolicy(){const pf=$('#pFile');const p={id:uid(),insurer:val('pIns'),type:val('pType'),holder:val('pHolder'),number:val('pNo'),confirmed:false,file:pf&&pf.files[0]?pf.files[0].name:'',
+   f:{sum:1000000,room:5000,copay:10,waitEnd:new Date(Date.now()+110*864e5).toISOString().slice(0,10),ped:36,excl:'Cosmetic surgery, dental unless accident, infertility treatment'}};
+  D.policies.push(p);save();go({view:'policy',viewId:p.id})},
+ openPolicy(el){go({tab:'policies',view:'policy',viewId:el.dataset.id})},
+ confirmPolicy(el){const p=D.policies.find(x=>x.id===el.dataset.id);
+  const n=k=>Number(val('f_'+k));if(!(n('sum')>0)||!(n('room')>0)||n('copay')<0||n('copay')>100)return toast('Check the numbers: sum insured and room rent must be above zero, co-pay between 0 and 100.');
+  p.f={sum:n('sum'),room:n('room'),copay:n('copay'),waitEnd:val('f_waitEnd'),ped:n('ped'),excl:val('f_excl')};p.confirmed=true;ui.cdPolicy=ui.cdPolicy||p.id;save();toast('Policy details confirmed');draw()},
+ delPolicy(el){modal(`<h3>Remove this policy?</h3><p class="muted" style="margin:8px 0 14px">Your records stay. Only the policy details are removed.</p><div class="stack"><button class="btn danger" data-act="doDelPolicy" data-id="${el.dataset.id}">Remove policy</button><button class="btn alt" data-act="closeModal">Cancel</button></div>`)},
+ doDelPolicy(el){D.policies=D.policies.filter(p=>p.id!==el.dataset.id);save();ui.modal='';go({view:null})},
+ calc(el){const p=D.policies.find(x=>x.id===el.dataset.id),bill=Number(val('cBill')),rent=Number(val('cRoom'));
+  if(!(bill>0)||!(rent>0)){$('#calcOut').innerHTML='<div class="err">Enter the bill and the room rent.</div>';return}
+  const ratio=rent>p.f.room?p.f.room/rent:1,afterRoom=bill*ratio,afterCopay=afterRoom*(1-p.f.copay/100),pays=Math.min(afterCopay,p.f.sum),you=bill-pays;
+  $('#calcOut').innerHTML=`<div class="card tint" style="margin-top:10px"><div class="kv"><span>Insurer may pay</span><span>${inr(Math.round(pays))}</span><span>You may pay</span><span>${inr(Math.round(you))}</span></div>
+  <p class="small" style="margin-top:8px">${ratio<1?`Your room (${inr(rent)}) is above the ${inr(p.f.room)} limit, so many policies cut other charges by the same proportion (about ${Math.round((1-ratio)*100)}% here). Check your policy page 12.`:'Your room is within the limit, so only the co-pay applies in this estimate.'}</p></div>`},
+ careF(){ui.city=val('city');ui.spec=val('spec');ui.onlyMine=$('#onlyMine').checked;draw()},
+ recM(el){go({recMember:el.dataset.v})},
+ recT(){ui.recType=val('recType');draw()},
+ addRecord(){go({view:'addRecord'})},
+ saveRecord(){ui.err='';const r=addRecordFrom(val('upMember'),'upType',val('upDate'));if(!r){toast('Choose a file first.');return}
+  D.records.push(r);save();go({view:null,tab:'records'});toast('Record saved')},
+ openRecord(el){const r=D.records.find(x=>x.id===el.dataset.id),f=FILES[r.id]||(r.data?dataToBlob(r.data):null);let prev='',pdf=false;
+  if(f&&f.type.startsWith('image/')){prev=`<img class="preview" style="max-height:none" alt="Preview of ${esc(r.name)}" src="${URL.createObjectURL(f)}">`}
+  else if(f&&(f.type==='application/pdf'||/\.pdf$/i.test(f.name||''))){pdf=true;prev=`<div id="pdfBox"><div class="card tint small">Opening PDF...</div></div>`}
+  else if(f){prev=`<div class="card small">This file type cannot be previewed here. Upload a PDF or a photo to read it in the app.</div>`}
+  else if(r.dummy){prev=`<img class="preview" style="max-height:none" alt="Sample ${esc(r.type)}" src="${drawDoc(r)}">`}
+  else prev=`<div class="card tint small">The file itself was kept only for the earlier session in this prototype. Please upload it again to read it. The details stay saved.</div>`;
+  modal(`<div class="stack"><div class="row between"><h3>${esc(r.type)}</h3><button class="btn ghost" data-act="closeModal">Close</button></div>${prev}
+  <div class="kv"><span>For</span><span>${esc(member(r.member).name)}</span><span>Date</span><span>${fmtDate(r.date)}</span><span>File</span><span>${esc(r.name)}</span><span>Size</span><span>${size(r.size)}</span></div>
+  <button class="btn danger" data-act="delRecord" data-id="${r.id}">Delete record</button></div>`);
+  if(pdf)renderPdf(f)},
+ delRecord(el){D.records=D.records.filter(r=>r.id!==el.dataset.id);delete FILES[el.dataset.id];save();ui.modal='';draw();toast('Record deleted')},
+ openClaim(){go({view:'claim'})},
+ cdF(){ui.cdMember=val('cdM');ui.cdPolicy=val('cdP');draw()},
+ copyPack(){const m=member(ui.cdMember),pol=D.policies.find(p=>p.id===ui.cdPolicy);
+  const lines=CLAIM_DOCS.map(t=>`${D.records.some(r=>r.member===m.id&&r.type===t)?'[x]':'[ ]'} ${t}`);
+  const txt=`Claim pack summary\nPatient: ${m.name}\nPolicy: ${pol?pol.insurer+(pol.number?' '+pol.number:''):'not selected'}\n${lines.join('\n')}`;
+  try{navigator.clipboard.writeText(txt).then(()=>toast('Summary copied'),()=>modal(copyFallback(txt)))}catch(e){modal(copyFallback(txt))}},
+ addMember(){const n=val('mName');if(n.length<2)return toast('Enter the family member\'s name.');D.members.push({id:uid(),name:n,relation:val('mRel')});save();draw();toast(n+' added')},
+ logout(){try{localStorage.removeItem('hbw-last')}catch(e){}D=null;clearInterval(startTimer.i);go({screen:'login',phone:'',tab:'home',view:null})},
+ wipe(){modal(`<h3>Delete all your data?</h3><p class="muted" style="margin:8px 0 14px">This removes your profile, policies and records from this browser. It cannot be undone.</p><div class="stack"><button class="btn danger" data-act="doWipe">Delete everything</button><button class="btn alt" data-act="closeModal">Cancel</button></div>`)},
+ doWipe(){delete DB.users[D.phone];save();ui.modal='';acts.logout()},
+ closeModal(){ui.modal='';draw()}
+};
+const copyFallback=t=>`<h3>Copy this summary</h3><textarea style="min-height:140px;margin:10px 0" readonly>${esc(t)}</textarea><button class="btn alt" data-act="closeModal">Close</button>`;
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-stop]')&&!e.target.closest('[data-act]'))return;
+ const el=e.target.closest('[data-act]');if(!el||el.tagName==='SELECT'||el.type==='checkbox')return;
+ if(el.classList.contains('modal')&&e.target!==el)return;
+ const f=acts[el.dataset.act];if(f)f(el);
+});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-act]');if(el&&(el.tagName==='SELECT'||el.type==='checkbox')){const f=acts[el.dataset.act];if(f)f(el)}});
+document.addEventListener('input',e=>{if(e.target.id==='recQ'){ui.recQ=e.target.value;const n=e.target.selectionStart;draw();const q=$('#recQ');q.focus();q.setSelectionRange(n,n)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){if(ui.screen==='login')acts.sendOtp();else if(ui.screen==='otp')acts.verify()}});
+draw();
+try{const l=localStorage.getItem('hbw-last');if(l&&DB.users[l]){ui.phone=l;openUser(l)}}catch(e){}
+</script>
+</body>
+</html>
